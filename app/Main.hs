@@ -52,7 +52,7 @@ printDOTs fm ms
 
 main :: IO ()
 main = do 
-          printDOTs fm2 $ [kripkeToDOTGraph'' test1]
+          printDOTs fm2 $ map kripkeToDOTGraph'' test1
         --   let models = everyKSM (primsUsed formula) (agentsUsed formula) realWorld
         --   putStrLn $ show $ length models
         --   putStrLn $ show $ length foundModels
