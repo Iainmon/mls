@@ -8,6 +8,9 @@ import Language
 import Kripke
 
 
+
+
+
 -- Make this into a typeclass somehow? or parts of it?
 sem :: Eq state => KripkeModel agent prim state -> state -> L agent prim -> Bool
 sem model@(M{agents,prims,states,accessibility,valuation}) s phi = sem' phi
