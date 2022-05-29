@@ -92,11 +92,25 @@ everyState = subsets
 
 -- Given a world, and a set of agents, construct every way that world could be considered.
 everyLabel :: (Eq agent,Eq prim) => State prim -> [agent] -> [(State prim,[agent])]
-everyLabel world = map (world,) . subsets -- [(world,as) | as <- subsets agents]
+everyLabel world = map (world,) . subsets
 
-allEdges :: (Eq agent,Eq prim) => Collection (State prim) -> Collection agent -> [[(State prim,[agent])]]
-allEdges worlds agents = go worlds -- subsets [(w,a) | w <- worlds, a <- agents]
+
+
+allEdges :: (Eq agent,Eq prim) => Collection (State prim) -> Collection agent -> Collection (KSEdges agent prim)
+allEdges worlds agents = go worlds
   where go []     = [[]]
         go (w:ws) = concat [map (:fx) (map (w,) agps) | fx <- go ws]
         agps = subsets agents
+
+allAccess :: (Eq agent,Eq prim) => Collection prim -> Collection agent -> State prim -> Collection (KSAccessRelation agent prim)
+allAccess prims agents state = map (edgesToKSAccess state) relations
+  where states    = everyState prims
+        relations = allEdges states agents
+
+
+everyKSM :: (Eq agent,Eq prim) => Collection prim -> Collection agent -> State prim -> Collection (KripkeStar agent prim)
+everyKSM prims agents state = map (consKS agents prims) accesses
+  where accesses = allAccess prims agents state
+
+
 
