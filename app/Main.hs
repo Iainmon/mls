@@ -18,8 +18,14 @@ import Data.List (nubBy,findIndex)
 findIndex' a b = case findIndex a b of { (Just i) -> i }
 
 
-
-formula = (Know "a" ((Prim "ta") `And` (Prim "tb"))) `And` (Know "b" (Prim "ta")) -- (Know "b" (Neg $ And (Neg $ Prim "ta") (Neg $ Prim "tb")))
+p1 = Prim "p1"
+p2 = Prim "p2"
+p3 = Prim "p3"
+ka = Know "a"
+kb = Know "b"
+kc = Know "c"
+formula = (ka (p1 `And` p2)) `And` (kb (p2 `And` p3)) `And` (kc (p3 `And` p1))
+-- formula = (Know "a" ((Prim "ta") `And` (Prim "tb"))) `And` (Know "b" (Prim "ta")) -- (Know "b" (Neg $ And (Neg $ Prim "ta") (Neg $ Prim "tb")))
 
 
 foundModels = findModels formula
@@ -41,6 +47,10 @@ printDOTs fm ms
 
 main :: IO ()
 main = do 
+          let models = everyKSM (primsUsed formula) (agentsUsed formula) realWorld
+          putStrLn $ show $ length models
+          putStrLn $ show $ length foundModels
           let foundModels = reverse $ findModels formula
-          mapM_ putStrLn $ map kripkeToDOTGraph' (foundModels)
+          -- mapM_ putStrLn $ map kripkeToDOTGraph' (foundModels)
           printDOTs formula $ map kripkeToDOTGraph' foundModels
+          putStrLn $ show $ length foundModels
