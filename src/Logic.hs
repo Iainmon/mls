@@ -18,7 +18,7 @@ sem model@(M{agents,prims,states,accessibility,valuation}) s phi = sem' phi
         sem' (Prim pr)   = valuation s pr
         sem' (Neg phi)   = not $ models s phi
         sem' (And p1 p2) = models s p1 && models s p2
-        sem' (Know a p)  = and [models t p | (s',t) <- accessibility a, s == s']
+        sem' (Know a p)  = if null $ accessibility a then False else and [models t p | (s',t) <- accessibility a, s == s']
         sem' (Believe a p)  = and [models t p | (s',t) <- accessibility a, s == s']
 
 

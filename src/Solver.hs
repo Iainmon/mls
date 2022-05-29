@@ -10,6 +10,15 @@ import Logic
 
 import Data.List (inits, tails, nub, permutations, nubBy, isPrefixOf, sort)
 
+realWorld :: State prim
+realWorld = []
+
+findModels :: (Eq agent, Eq prim) => L agent prim -> Collection (KripkeStar agent prim)
+findModels formula = filter satisfies models
+  where models      = everyKSM (primsUsed formula) (agentsUsed formula) realWorld
+        satisfies m = sem m realWorld formula
+
+
 
 -- import Data.List (inits, tails, nub, permutations, nubBy, isPrefixOf, sort)
 
