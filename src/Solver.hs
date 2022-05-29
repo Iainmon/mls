@@ -4,8 +4,10 @@ module Solver where
 
 import Language
 import Kripke
-import Logic
+import Logic 
 
+import Data.Set (Set)
+import qualified Data.Set as Set
 
 
 import Data.List (inits, tails, nub, permutations, nubBy, isPrefixOf, sort)
@@ -20,75 +22,54 @@ findModels formula = filter satisfies models
 
 
 
--- import Data.List (inits, tails, nub, permutations, nubBy, isPrefixOf, sort)
 
--- import Data.Set (Set)
--- import qualified Data.Set as Set
+type PrimProp = Int
+type Agent    = Int
+type World    = State PrimProp
 
-
--- type State prim = ([prim],[prim]) -- (truths, falsehoods)
-
--- type KripkeStar agent prim = KripkeModel agent prim (State prim)
-
--- realWorld = ([],[])
-
--- decide :: Eq prim => State prim -> prim -> Bool
--- decide (trus,flss) p | p `elem` trus = True
---                      | p `elem` flss = False
---                      | trus == [] && flss == [] = True 
---                      | otherwise     = undefined
-
--- partitions :: [a] -> [[[a]]]
--- partitions = foldr (\x r -> r >>= bloat x) [[]]
---   where bloat x  []      = [[[x]]]
---         bloat x (xs:xss) = ((x:xs):xss) : map (xs:) (bloat x xss)
-
--- bipartitions :: [a] -> [[[a]]]
--- bipartitions = filter ((==) 2 . length) . partitions
-
--- consStates :: Eq prim => [prim] -> [State prim]
--- -- consStates xs = [(as,bs) | [as,bs] <- bipartitions xs]
--- consStates xs = [(a,b) | b <- subsets xs,
---                          a <- subsets xs,
---                          a ++ b `elem` permutations xs]
+type Formula = L Agent PrimProp
 
 
--- consModel :: (Eq agent, Eq prim) => [agent] -> [prim] -> R agent (State prim) -> KripkeModel agent prim (State prim)
--- consModel ags prms accessR = M { agents       = ags
---                               , prims         = prms
---                               , states        = consStates prms
---                               , valuation     = decide
---                               , accessibility = accessR
---                               }
-            
+data Traversal a b = Step a [(Traversal a b, b)] deriving Show
 
--- subsets :: [a] -> [[a]]
--- subsets []  = [[]]
--- subsets (x:xs) = subsets xs ++ map (x:) (subsets xs)
+class Search g where
+  options :: Eq a => g a b -> a -> [a]
+  walk :: Eq a => g a b -> (a -> [b]) -> a -> Traversal a b
 
--- consRelations :: Eq state => [state] -> state -> [[(state,state)]]
--- consRelations states s = map (map (s,)) $ subsets states
+data Graph a b = G { nodes :: [a], edges :: [(a,a,b)] } deriving Show
 
--- functionify :: Eq a => [(a,b)] -> a -> b
--- functionify [] _ = undefined
--- functionify ((x,y):xys) x' | x == x'   = y
---                            | otherwise = functionify xys x'
+instance Search Graph where
+  options g a = nodes g
+  walk g@(G{nodes,edges}) f a = Step a [ (walk g f a',b) | a' <- options g a, b <- f a]
 
 
 
--- consModels :: (Eq agent, Ord prim) => [agent] -> [prim] -> [KripkeStar agent prim]
--- consModels ags prms = map (consModel ags prms) relations
---   where relations     = map functionify $ [ss | ss <- subsets relationPairs, (nub $map fst ss) `elem` permutations (nub ags)]-- length (map fst ss) == length ags]
---         relationPairs = nub [(a,rel) | rel <- rels, a <- ags]
---         valid rel = length ags == length (map fst rel) -- (map fst rel) `elem` permutations ags
---         states = consStates prms
---         rels = consRelations states realWorld
+satisfy agnt (Prim p) vs = if elem p vs then [agnt] else []
+satisfy agnt (Neg p) vs = if null $ satisfy agnt p vs then [agnt] else [] 
+satisfy agnt (And p1 p2) vs = satisfy agnt p1 vs ++ satisfy agnt p2 vs 
+satisfy agnt (Know a p) vs = satisfy a p vs
 
--- findModels :: (Eq ag, Ord at) => L ag at -> [KripkeStar ag at]
--- findModels formula = filter satisfies models
---   where models = consModels (agentsUsed formula) (primsUsed formula)
---         satisfies m = sem m realWorld formula
+search ag fm = satisfy ag fm
+
+g1 = G { nodes = subsets [1,2,3], edges = [] }
+
+spanning :: (Eq a) => Graph a b -> Traversal a b -> Graph a b
+spanning g (Step a []) = g
+spanning g (Step a tvs) = G { nodes = (nodes g), edges = edges g ++ map (root a) tvs }
+  where root a' ((Step a'' _),b) = (a',a'',b)
+
+trav1 = walk g1 (search 1 (Prim 1)) [1]
+
+satisfyingTraversal graph agent formula s0 = walk graph (search agent formula) s0
+solveGraph graph agent formula = G { nodes = nodes graph, edges = edges' }
+  where graph' = spanning graph . satisfyingTraversal graph agent formula
+        edges' = nub $ concat [edges $ graph' s | s <- nodes graph]
+-- spanning g1 (walk g1 (search 1 (Know 1 (Prim 1))) [1])
+-- => G {nodes = [[],[3],[2],[2,3],[1],[1,3],[1,2],[1,2,3]], edges = [([1],[],1),([1],[3],1),([1],[2],1),([1],[2,3],1),([1],[1,3],1),([1],[1,2],1),([1],[1,2,3],1)]}
 
 
--- sameRelation :: (Ord ag, Ord at) => KripkeStar ag at -> KripkeStar ag at -> Bool
--- sameRelation k1 k2 = Set.fromList [(a,s) | a <- agents k1,s <- accessibility k1 a] == Set.fromList [(a,s) | a <- agents k2,s <- accessibility k2 a]
+g2 = G { nodes = subsets [1,2], edges = [] }
+fm2 = (Know 1 (Prim 1 `And` Prim 2))
+test1 = solveGraph g2 1 (Prim 1 `And` Prim 2) 
+
+
