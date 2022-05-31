@@ -25,7 +25,8 @@ p3 = Prim "p3"
 ka = Know "a"
 kb = Know "b"
 kc = Know "c"
-formula = (ka (p1 `And` p2 `And` p3)) `And` (kb p2) `And` (kc p3)
+-- formula = (ka (p1 `And` p2 `And` p3)) `And` (kb p2) `And` (kc p3)
+formula = (ka (p1 `And` p2)) `And` (kb (p2 `And` p3)) `And` (kc (p1 `And` p3))
 -- formula = (Know "a" ((Prim "ta") `And` (Prim "tb"))) `And` (Know "b" (Prim "ta")) -- (Know "b" (Neg $ And (Neg $ Prim "ta") (Neg $ Prim "tb")))
 
 
@@ -58,7 +59,8 @@ printDOTs fm ms
 
 main :: IO ()
 main = do 
-          printDOTs fm2 $ map kripkeToDOTGraph'' test1
+          printDOTs formula $ map kripkeToDOTGraph' [fst (satKM' formula)]
+          -- printDOTs fm2 $ map kripkeToDOTGraph'' test1
         --   let models = everyKSM (primsUsed formula) (agentsUsed formula) realWorld
         --   putStrLn $ show $ length models
         --   putStrLn $ show $ length foundModels

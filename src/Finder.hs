@@ -55,7 +55,8 @@ satKM' :: (Eq ag,Eq at) => L ag at -> (KripkeModel ag at (State at),[State at])
 satKM' phi = (km',ss)
   where (km,ss) = satKM phi
         km' = km { accessibility = nub . ac' }
-        ac' a = [(s,t) | s <- ss,
+        ac' a = reflize [(s,t) | s <- ss,
                          t <- states km,
                          and [ satState (valuation km) t phi' | phi' <- agentKnowledge phi a]
                          ]
+        reflize xs = [(x,x) | (_,x) <- xs] ++ xs
