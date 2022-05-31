@@ -49,11 +49,13 @@ agentKnowledge (And p1 p2) a = concatMap (flip agentKnowledge a) [p1,p2]
 agentKnowledge (Know a p)  a' | a == a'   = agentKnowledge p a
                               | otherwise = []
 
+
+
 satKM' :: (Eq ag,Eq at) => L ag at -> (KripkeModel ag at (State at),[State at])
 satKM' phi = (km',ss)
   where (km,ss) = satKM phi
         km' = km { accessibility = nub . ac' }
         ac' a = [(s,t) | s <- ss,
-                         phi' <- agentKnowledge phi a,
                          t <- states km,
-                         satState (valuation km) t phi']
+                         and [ satState (valuation km) t phi' | phi' <- agentKnowledge phi a]
+                         ]
