@@ -25,7 +25,7 @@ p3 = Prim "p3"
 ka = Know "a"
 kb = Know "b"
 kc = Know "c"
-formula = (ka (p1 `And` p2)) `And` (kb (p2 `And` p3)) `And` (kc (p3 `And` p1))
+formula = (ka (p1 `And` p2)) `And` (kb (p2)) `And` (kc (p3 `And` p1))
 -- formula = (Know "a" ((Prim "ta") `And` (Prim "tb"))) `And` (Know "b" (Prim "ta")) -- (Know "b" (Neg $ And (Neg $ Prim "ta") (Neg $ Prim "tb")))
 
 

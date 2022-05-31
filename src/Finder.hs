@@ -4,6 +4,7 @@
 
 module Finder where
 
+import Data.List (nub)
 import Lib
 import Language
 import Kripke
@@ -40,3 +41,19 @@ satKM phi = (km',ss)
         km' = km { accessibility = ac' }
         ac' _ = zip ss ss
 
+
+agentKnowledge :: Eq ag => L ag at -> ag -> [L ag at]
+agentKnowledge (Prim p) _ = [Prim p]
+agentKnowledge (Neg p) a  = map Neg $ agentKnowledge p a
+agentKnowledge (And p1 p2) a = concatMap (flip agentKnowledge a) [p1,p2]
+agentKnowledge (Know a p)  a' | a == a'   = agentKnowledge p a
+                              | otherwise = []
+
+satKM' :: (Eq ag,Eq at) => L ag at -> (KripkeModel ag at (State at),[State at])
+satKM' phi = (km',ss)
+  where (km,ss) = satKM phi
+        km' = km { accessibility = nub . ac' }
+        ac' a = [(s,t) | s <- ss,
+                         phi' <- agentKnowledge phi a,
+                         t <- states km,
+                         satState (valuation km) t phi']
