@@ -66,6 +66,19 @@ consKS ags pps access = M { agents        = ags
                           , accessibility = access
                           }
 
+
+reflexiveKM :: (Eq agent, Eq prim) => [agent] -> [prim] -> KripkeModel agent prim (State prim)
+reflexiveKM ags pms = consKS ags pms ac
+  where ac _ = [(a,a) | a <- subsets pms]
+
+connectedKM :: (Eq agent, Eq prim) => [agent] -> [prim] -> KripkeModel agent prim (State prim)
+connectedKM ags pms = consKS ags pms ac
+  where ac _ = [(a,b) | a <- subsets pms,b <- subsets pms]
+
+unconnectedKM :: (Eq agent, Eq prim) => [agent] -> [prim] -> KripkeModel agent prim (State prim)
+unconnectedKM ags pms = consKS ags pms ac
+  where ac _ = []
+
 -- Type of a specific agent's accessibility relation for a Kripke Star Model (KSM).
 -- Equivalently, a pair of an agent, and the set of worlds the agent considers from the real world.
 -- newtype KSConsiders agent prim 

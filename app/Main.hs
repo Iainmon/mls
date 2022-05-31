@@ -6,6 +6,7 @@ import Language
 import Kripke
 import Logic
 import Solver
+import Finder
 
 import System.Process
 
@@ -27,6 +28,11 @@ kc = Know "c"
 formula = (ka (p1 `And` p2)) `And` (kb (p2 `And` p3)) `And` (kc (p3 `And` p1))
 -- formula = (Know "a" ((Prim "ta") `And` (Prim "tb"))) `And` (Know "b" (Prim "ta")) -- (Know "b" (Neg $ And (Neg $ Prim "ta") (Neg $ Prim "tb")))
 
+
+km = unconnectedKM [1,2] [1,2]
+
+
+f m = sat m [] (Know 1 $ Prim 1)
 
 foundModels = findModels formula
 

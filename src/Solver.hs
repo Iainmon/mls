@@ -2,6 +2,7 @@
 
 module Solver where
 
+import Lib
 import Language
 import Kripke
 import Logic 
@@ -42,10 +43,6 @@ instance Search Graph where
   options g a = nodes g
   walk g@(G{nodes,edges}) f a = Step a [ (walk g f a',b) | a' <- options g a, b <- f a]
 
-intersect :: Eq a => [a] -> [a] -> [a]
-intersect [] _ = []
-intersect (x:xs) l | elem x l = x : intersect xs l
-                   | otherwise = intersect xs l
 
 satisfy agnt (Prim p) vs = if elem p vs then [agnt] else []
 satisfy agnt (Neg p) vs = if null $ satisfy agnt p vs then [agnt] else [] 
@@ -74,5 +71,18 @@ solveGraph graph agent formula = G { nodes = nodes graph, edges = edges' }
 g2 = G { nodes = subsets [0..3], edges = [] }
 fm2 = (Know 1 (Prim 1 `And` Prim 2))
 test1 = map (\i -> solveGraph g2 i ((Know (i) (foldl And (Prim 0) $ map Prim [1..i])))) [1..3]
+
+
+data RoseTree a = Node a [RoseTree a] deriving Show
+
+spans vs v (Prim p)    = if p `elem` v then [v] else []
+spans vs v (Neg p)     = undefined
+spans vs v (And p1 p2) = spans vs v p1 `intersect` spans vs v p2
+spans vs v (Know a p)  = let vs' = (filter (/=v) vs) in v : concatMap (flip (spans vs') p) vs
+
+trave (v:vs) a (Prim p)    = Node (v,a) $ map (\v -> Node (v,a) []) vs
+trave (v:vs) a (And p1 p2) = Node (v,a) $ [trave vs a p1, trave vs a p2]
+trave (v:vs) a (Know a' p) = Node (v,a) $ [trave vs a' p]
+
 
 
