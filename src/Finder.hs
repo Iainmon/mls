@@ -60,3 +60,5 @@ satKM' phi = (km',ss)
                          and [ satState (valuation km) t phi' | phi' <- agentKnowledge phi a]
                          ]
         reflize xs = [(x,x) | (_,x) <- xs] ++ xs
+
+

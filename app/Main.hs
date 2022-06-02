@@ -26,9 +26,34 @@ ka = Know "a"
 kb = Know "b"
 kc = Know "c"
 -- formula = (ka (p1 `And` p2 `And` p3)) `And` (kb p2) `And` (kc p3)
-formula = (ka (p1 `And` p2)) `And` (kb (p2 `And` p3)) `And` (kc (p1 `And` p3))
+-- formula = (ka (p1 `And` p2)) `And` (kb (p2 `And` p3)) `And` (kc (p1 `And` p3))
 -- formula = (Know "a" ((Prim "ta") `And` (Prim "tb"))) `And` (Know "b" (Prim "ta")) -- (Know "b" (Neg $ And (Neg $ Prim "ta") (Neg $ Prim "tb")))
 
+
+-- Presentation examples:
+-- formula = (ka (p1 `And` p2) `And` (kb p2))
+-- formula = (ka (p1 `And` p2) `And` (kb (p2 `And` p1)))
+-- formula = (ka (p1 `And` p2) `And` (kb (p2 `And` p1)) `And` (kc p3))
+
+
+
+
+
+
+
+
+
+
+
+
+conjoin [] = undefined
+conjoin [x] = x `And` x
+conjoin (x:xs) = x `And` (conjoin xs)
+
+-- formula = conjoin $ zipWith Know ags clauses
+--   where clauses = map conjoin $ [cls | cls <- subsets $ pms, length cls == 2]
+--         pms = map (Prim . ('p':) . show) [1..4]
+--         ags = map (:[]) ['a'..'c']
 
 km = unconnectedKM [1,2] [1,2]
 
@@ -55,10 +80,11 @@ kripkeToDOTGraph'' m = remove "\\\"" $ "digraph G {\nnode [colorscheme=paired9 s
 
 printDOTs fm ms 
   = do system "rm -rf out; mkdir out"
-       mapM_ system $ map (\(i,gs) -> "echo '" ++ gs ++ "' | dot -Tpng > out/"++ show i ++".png -Glabel=\"" ++ show fm ++ "\"") (zip [1..length ms] ms)
+       mapM_ system $ map (\(i,gs) -> "echo '" ++ gs ++ "' | dot -Tsvg > out/"++ show i ++".svg -Glabel=\"" ++ show fm ++ "\"") (zip [1..length ms] ms)
 
 main :: IO ()
 main = do 
+          -- putStrLn $ kripkeToDOTGraph' $fst (satKM' formula)
           printDOTs formula $ map kripkeToDOTGraph' [fst (satKM' formula)]
           -- printDOTs fm2 $ map kripkeToDOTGraph'' test1
         --   let models = everyKSM (primsUsed formula) (agentsUsed formula) realWorld
@@ -68,3 +94,10 @@ main = do
         --   -- mapM_ putStrLn $ map kripkeToDOTGraph' (foundModels)
         --   printDOTs formula $ map kripkeToDOTGraph' foundModels
         --   putStrLn $ show $ length foundModels
+
+
+
+-- satKM' :: (Eq ag,Eq at) => L ag at -> (KripkeModel ag at (State at),[State at])
+
+-- genKripke :: (Eq ag,Eq at) => L ag at -> (KripkeModel ag at (State at),[State at])
+

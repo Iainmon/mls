@@ -14,9 +14,9 @@ data L ag at
 
 instance (Show ag,Show at) => Show (L ag at) where
   show (Prim p) = show p
-  show (Neg p)  = "¬ " ++ show p
-  show (And p1 p2) = "(" ++ show p1 ++ " ⋀ " ++ show p2 ++ ")"
-  show (Know a p)  = "K<" ++ show a ++ ">[" ++ show p ++ "]"
+  show (Neg p)  = "¬ (" ++ show p ++ ") "
+  show (And p1 p2) = show p1 ++ " ⋀ " ++ show p2
+  show (Know a p)  = "K<" ++ show a ++ ">(" ++ show p ++ ")"
   show (Believe a p) = "B<" ++ show a ++ ">[" ++ show p ++ "]"
 
 agentsUsed :: Eq ag => L ag at -> [ag]
