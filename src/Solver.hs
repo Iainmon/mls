@@ -70,7 +70,7 @@ solveGraph graph agent formula = G { nodes = nodes graph, edges = edges' }
 
 g2 = G { nodes = subsets [0..3], edges = [] }
 fm2 = (Know 1 (Prim 1 `And` Prim 2))
-test1 = map (\i -> solveGraph g2 i ((Know (i) (foldl And (Prim 0) $ map Prim [1..i])))) [1..3]
+-- test1 = map (\i -> solveGraph g2 i ((Know (i) (foldl And (Prim 0) $ map Prim [1..i])))) [1..3]
 
 
 data RoseTree a = Node a [RoseTree a] deriving Show

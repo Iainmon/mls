@@ -8,6 +8,7 @@ import Data.List (nub)
 import Lib
 import Language
 import Kripke
+import Logic
 
 peval :: L ag at -> (at -> Bool) -> Bool
 peval (Prim p) val    = val p
@@ -61,4 +62,7 @@ satKM' phi = (km',ss)
                          ]
         reflize xs = [(x,x) | (_,x) <- xs] ++ xs
 
+evaluate :: (Eq agent,Eq prim) => L agent prim -> L agent prim -> Bool
+evaluate p p' = and $ map (flip (sem km) p') ss
+    where (km,ss) = satKM' p
 
